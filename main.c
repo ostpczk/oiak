@@ -1,5 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+
+struct Double_number {
+   bool  sign;
+   bool  exponent[11];
+   bool  fraction[52];
+};
 
 int main()
 {
@@ -12,5 +19,6 @@ int main()
 
     result = op_a + op_b;
     printf("\nWynik to: %lf", result);
+
     return 0;
 }
