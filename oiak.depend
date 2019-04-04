@@ -1,5 +1,7 @@
 # depslib dependency file v1.0
-1553954256 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/main.c
+1554345423 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/main.c
 	<stdio.h>
 	<stdlib.h>
+
+1554345264 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/add.s
 

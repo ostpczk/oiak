@@ -8,6 +8,7 @@ struct Double_number {
 }d0, d1;
 
 //assumes little endian
+/*
 void printBits(size_t const size, void const * const ptr)
 {
     unsigned char *b = (unsigned char*) ptr;
@@ -23,43 +24,35 @@ void printBits(size_t const size, void const * const ptr)
         }
     }
     puts("");
-}
+}*/
 
-extern int add(double o_1, double o_2);
+extern int* add(double* o_1, double* o_2);
 
 int main()
 {
 
-
-    d0.sign = 0b0;
-    d1.sign = 0b0;
-    d0.exponent = 0b11000010000;
-    d1.exponent = 0b11000000000;
-    d0.fraction = 0b0000000000000000000000000000000000000000000000000000;
-    d1.fraction = 0b0000000000000000000000000000000000000000000000000000;
-
-
-
-
-    double op_a, op_b, result;
+    double op_a = 0;
+    double op_b = 0;
+    int* result = 0;
     printf("SUMOWANIE:\nWpisz pierwsza liczbe : ");
     scanf("%lf", &op_a);
     printf("\nWpisz druga liczbe:");
     scanf("%lf", &op_b);
 
-    if (op_a >= 0) d0.sign= 0;
-    else d0.sign=1;
+    double* p_a;
+    double* p_b;
 
+    p_a = &op_a;
+    p_b = &op_b;
 
-    int size= 54;
-    printBits(sizeof(op_a), &op_a);
+    result = add(p_a, p_b);
 
+    printf("\nWynik to:"); // segmentation fault na wywołaniu tej funkcji - dlaczego?
 
-
-    result = add(op_a, op_b);
-
-    //result = op_a + op_b;
-    printf("\nWynik to: %lf", result);
+    for(int i = 0; i < 64; i++)
+    {
+        printf("%d", result[i]);
+    }
 
     return 0;
 }
