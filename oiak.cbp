@@ -12,6 +12,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-fPIC" />
 					<Add option="-g" />
 				</Compiler>
 			</Target>
@@ -22,6 +23,8 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-fPIC" />
+					<Add option="-fPIC" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -30,7 +33,9 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-fPIC" />
 		</Compiler>
+		<Unit filename="add.s" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
