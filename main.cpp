@@ -18,6 +18,19 @@ int main()
     xDouble op2;
     xDouble op3;
 
+    op1.exponent = 0;
+    op1.fraction1 = 0;
+    op1.fraction2 = 0;
+
+    op2.exponent = 0;
+    op2.fraction1 = 0;
+    op2.fraction2 = 0;
+
+    op3.exponent = 0;
+    op3.fraction1 = 0;
+    op3.fraction2 = 0;
+
+
     op1.exponent_s[11] = '\0';    // inicjalizacje
     op1.fraction1_s[20] = '\0';   // znakow
     op1.fraction2_s[32] = '\0';   // konca
@@ -99,14 +112,11 @@ int main()
 
     for(int i = 31; i >= 0; i--)
     {
-        if (display_number % 2 == 0)
-        {
-                op2.fraction2_s[i] = '0';
-        }
+        if (display_number % 2 == 0) op2.fraction2_s[i] = '0';
         else
         {
             op2.fraction2_s[i] = '1';
-            op2.fraction2 += (1 << (31-i));
+            op2.fraction2 += (1 << 31-i);
         }
         display_number >>= 1;
     }
@@ -118,6 +128,7 @@ int main()
         {
             op2.fraction1_s[i] = '1';
             op2.fraction1 += (1 << (10-i));
+            op2.fraction1 += (1 << 19-i); // TODO 10 czy 19?
         }
         display_number >>= 1;
     }
@@ -145,10 +156,10 @@ int main()
     // Należy to potem zankcelerownać.                   //
     ///////////////////////////////////////////////////////
 
-        op3.sign = '0';
-        op3.exponent = 0;
-        op3.fraction1 = 0;
-        op3.fraction2 = 0;
+    op3.sign = '0';
+    op3.exponent = 0;
+    op3.fraction1 = 0;
+    op3.fraction2 = 0;
 
     if( (op1.sign != op2.sign) && (op1.exponent == op2.exponent) && (op1.fraction1 == op2.fraction1) && (op1.fraction2 == op2.fraction2)) // dodawanie liczb o przeciwnym znaku
     {
@@ -169,13 +180,14 @@ int main()
                 for(int i = 0; i < exp_diff; i++)
                 {
                     op2.fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
-                    if (op2.fraction1 % 2 == 1)     // czy ostatni bit to 1?
+                    if (op1.fraction1 % 2 == 1)     // czy ostatni bit to 1?
                         op2.fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
                     op2.fraction1 >>= 1;
                 }
             }
             else
             {
+                exp_diff*=-1;
                 for(int i = 0; i < exp_diff; i++)
                 {
                     op1.fraction2 >>= 1; // roundTowardZero - przez obciecie
@@ -183,6 +195,8 @@ int main()
                         op1.fraction2 += (1 << 31);
                     op1.fraction1 >>= 1;
                 }
+                op3.exponent = (op1.exponent = op2.exponent);
+                exp_diff*=-1;
             }
 
             op3.exponent = (op1.exponent = op2.exponent);
@@ -233,74 +247,40 @@ int main()
             op3.exponent = op1.exponent;
             //op3.fraction1 += (1<(20+1)); // 2 domyślne jedynki
 
-            if(op1.sign == '0')
+            if(op1.sign == op2.sign)
             {
-                if(op1.fraction1 > op2.fraction1) // op1 > op2
+                op3.sign = op1.sign;
+                add_op1_op2_fraction(op1_p, op2_p, op3_p);
+            }
+            else if(op1.sign == '0')
+            {
+                if(op1.fraction1 > op2.fraction1)
                 {
                     op3.sign = '0';
-                    add_op1_op2_fraction(op1_p, op2_p, op3_p);
-
-                }
-                else if(op1.fraction1 == op2.fraction1)
-                {
-                    if(op1.fraction2 == op2.fraction2)
-                    {
-                        op3.sign = '0';
-                        op3.fraction1 = 0;
-                        op3.fraction2 = 0;
-                    }
-                    else if(op1.fraction2 > op2.fraction2) // op1 > op2
-                    {
-                        op3.sign = '0';
-                        add_op1_op2_fraction(op1_p, op2_p, op3_p);
-                    }
-                    else //if (op1.fraction2 < op2.fraction2) // op1 < op2
-                    {
-                        op3.sign = '1';
-                        add_op1_op2_fraction(op1_p, op2_p, op3_p);
-                    }
-                }
-                else //if (op1.fraction1 < op2.fraction1) // op1 < op2
-                {
-                    op3.sign = '1';
                     sub_op1_op2_fraction(op1_p, op2_p, op3_p);
                 }
+                else if(op1.fraction1 < op2.fraction1)
+                {
+                    op3.sign = '1';
+                    sub_op2_op1_fraction(op1_p, op2_p, op3_p);
+                }
             }
-
             else if(op1.sign == '1')
             {
-                if(op1.fraction1 > op2.fraction1) // op1 > op2
+                if(op1.fraction1 > op2.fraction1)
                 {
                     op3.sign = '1';
                     sub_op1_op2_fraction(op1_p, op2_p, op3_p);
                 }
-                else if(op1.fraction1 == op2.fraction1)
-                {
-                    if(op1.fraction2 == op2.fraction2)
-                    {
-                        op3.sign = '1';
-                        op3.fraction1 = 0;
-                        op3.fraction2 = 0;
-                    }
-                    else if(op1.fraction2 > op2.fraction2) // op1 > op2
-                    {
-                        op3.sign = '1';
-                        sub_op1_op2_fraction(op1_p, op2_p, op3_p);
-                    }
-                    else //if (op1.fraction2 < op2.fraction2) // op1 < op2
-                    {
-                        op3.sign = '0';
-                        sub_op1_op2_fraction(op1_p, op2_p, op3_p);
-                    }
-                }
-                else //if (op1.fraction1 < op2.fraction1) // op1 < op2
+                else if(op1.fraction1 < op2.fraction1)
                 {
                     op3.sign = '0';
-                    sub_op1_op2_fraction(op1_p, op2_p, op3_p);
-
+                    sub_op2_op1_fraction(op1_p, op2_p, op3_p);
                 }
             }
+
         }
+
     }
 
 

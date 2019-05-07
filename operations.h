@@ -20,6 +20,7 @@ typedef struct xDouble
 
 void add_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3);
 void sub_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3);
+void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3);
 
 
 
