@@ -34,3 +34,20 @@
 1556779559 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/xDouble.cpp
 	"xDouble.h"
 
+1557241718 source:/home/romeo8982/Pobrane/oiak-master/main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<math.h>
+	<stdint.h>
+	<mmintrin.h>
+	<immintrin.h>
+	<xmmintrin.h>
+	<emmintrin.h>
+	"xDouble.h"
+
+1557236071 /home/romeo8982/Pobrane/oiak-master/xDouble.h
+	<stdint.h>
+
+1557236071 source:/home/romeo8982/Pobrane/oiak-master/xDouble.cpp
+	"xDouble.h"
+
