@@ -11,7 +11,7 @@
 
 1554345264 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/add.s
 
-1557235832 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/main.cpp
+1557250584 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/main.cpp
 	<stdio.h>
 	<stdlib.h>
 	<math.h>
@@ -20,7 +20,7 @@
 	<immintrin.h>
 	<xmmintrin.h>
 	<emmintrin.h>
-	"xDouble.h"
+	"operations.h"
 
 1556778605 /home/oscypex/Dokumenty/programowanie/pwr/oiak/include/xDouble.h
 	<stdint.h>
@@ -28,26 +28,18 @@
 1556718054 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/src/xDouble.cpp
 	"xDouble.h"
 
-1556779810 /home/oscypex/Dokumenty/programowanie/pwr/oiak/xDouble.h
+1557248778 /home/oscypex/Dokumenty/programowanie/pwr/oiak/xDouble.h
 	<stdint.h>
 
-1556779559 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/xDouble.cpp
+1557248778 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/xDouble.cpp
 	"xDouble.h"
 
-1557247935 source:/home/romeo8982/Pobrane/oiak-master/main.cpp
-	<stdio.h>
-	<stdlib.h>
-	<math.h>
+1557248778 /home/oscypex/Dokumenty/programowanie/pwr/oiak/operations.h
 	<stdint.h>
-	<mmintrin.h>
-	<immintrin.h>
-	<xmmintrin.h>
-	<emmintrin.h>
-	"xDouble.h"
+
+1557248778 source:/home/oscypex/Dokumenty/programowanie/pwr/oiak/operations.cpp
+	"operations.h"
 
 1557236071 /home/romeo8982/Pobrane/oiak-master/xDouble.h
 	<stdint.h>
-
-1557236071 source:/home/romeo8982/Pobrane/oiak-master/xDouble.cpp
-	"xDouble.h"
 

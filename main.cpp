@@ -7,17 +7,46 @@
 #include <xmmintrin.h>
 #include <emmintrin.h>
 
-#include "xDouble.h"
+#include "operations.h"
 
 #define FLT_RADIX 2
 
-xDouble op1;
-xDouble op2;
-xDouble op3; // "operand"
-
-
 int main()
 {
+
+    xDouble op1;
+    xDouble op2;
+    xDouble op3;
+
+    op1.exponent = 0;
+    op1.fraction1 = 0;
+    op1.fraction2 = 0;
+
+    op2.exponent = 0;
+    op2.fraction1 = 0;
+    op2.fraction2 = 0;
+
+    op3.exponent = 0;
+    op3.fraction1 = 0;
+    op3.fraction2 = 0;
+
+
+    op1.exponent_s[11] = '\0';    // inicjalizacje
+    op1.fraction1_s[20] = '\0';   // znakow
+    op1.fraction2_s[32] = '\0';   // konca
+
+    op2.exponent_s[11] = '\0';    // inicjalizacje
+    op2.fraction1_s[20] = '\0';   // znakow
+    op2.fraction2_s[32] = '\0';   // konca
+
+    op3.exponent_s[11] = '\0';    // inicjalizacje
+    op3.fraction1_s[20] = '\0';   // znakow
+    op3.fraction2_s[32] = '\0';   // konca
+
+    xDouble* op1_p = &op1;
+    xDouble* op2_p = &op2;
+    xDouble* op3_p = &op3;
+
     double input;
 
     printf("Podaj pierwsza liczbe:");
@@ -39,7 +68,7 @@ int main()
         else
         {
             op1.fraction2_s[i] = '1';
-            op1.fraction2 += (1 << 31-i);
+            op1.fraction2 += (1 << (31-i));
         }
         display_number >>= 1;
     }
@@ -51,7 +80,7 @@ int main()
         else
         {
             op1.fraction1_s[i] = '1';
-            op1.fraction1 += (1 << 19-i);
+            op1.fraction1 += (1 << (19-i));
         }
         display_number >>= 1;
     }
@@ -98,7 +127,7 @@ int main()
         else
         {
             op2.fraction1_s[i] = '1';
-            op2.fraction1 += (1 << 19-i);
+            op2.fraction1 += (1 << 19-i); // TODO 10 czy 19?
         }
         display_number >>= 1;
     }
@@ -125,6 +154,12 @@ int main()
     // Dodawanie po normalności. Bez użycia akcelerancji.//
     // Należy to potem zankcelerownać.                   //
     ///////////////////////////////////////////////////////
+
+    op3.sign = '0';
+    op3.exponent = 0;
+    op3.fraction1 = 0;
+    op3.fraction2 = 0;
+
     if( (op1.sign != op2.sign) && (op1.exponent == op2.exponent) && (op1.fraction1 == op2.fraction1) && (op1.fraction2 == op2.fraction2)) // dodawanie liczb o przeciwnym znaku
     {
         // dwie liczby maja rowny modul i przeciwny znak - zerujemy
@@ -148,8 +183,6 @@ int main()
                         op2.fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
                     op2.fraction1 >>= 1;
                 }
-
-                op3.exponent = (op2.exponent = op1.exponent);
             }
             else
             {
@@ -161,11 +194,12 @@ int main()
                         op1.fraction2 += (1 << 31);
                     op1.fraction1 >>= 1;
                 }
-
                 op3.exponent = (op1.exponent = op2.exponent);
                 exp_diff*=-1;
            //     op3.exponent>>=exp_diff;
             }
+
+            op3.exponent = (op1.exponent = op2.exponent);
 
             op3.fraction1 += (1 << 20); // dodanie domyślnej jedynki op1.
             if(exp_diff < 20)
@@ -182,90 +216,41 @@ int main()
             if(op1.sign == op2.sign)
             {
                 op3.sign = op1.sign;
-                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
-                op3.fraction2 += op2.fraction2; // akcelerancje sprzentowom
-                if(op3.fraction2 < op1.fraction2 || op3.fraction2 < op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 +=1; // przeniesienie do 1szej czesci mantysy
-                }
-                op3.fraction1 += op1.fraction1;
-                op3.fraction1 += op2.fraction1;
+                add_op1_op2_fraction(op1_p, op2_p, op3_p);
             }
             // a co jesli znaki są przeciwne?
             else if(op1.sign == '0' && exp_diff > 0)
             {
                 op3.sign = '0';
-
-                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
-                op3.fraction2 -= op2.fraction2; // akcelerancje sprzentowom
-                if(op2.fraction2 > op1.fraction2) // nadmiar
-                {
-                    op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
-                }
-                op3.fraction1 += op1.fraction1;
-                op3.fraction1 -= op2.fraction1;
+                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
 
             }
             else if(op1.sign == '0' && exp_diff < 0)
             {
                 op3.sign = '1';
-
-                op3.fraction2 += op2.fraction2; // tu mozna zastosowac
-                op3.fraction2 -= op1.fraction2; // akcelerancje sprzentowom
-                if(op1.fraction2 > op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
-                }
-                op3.fraction1 += op2.fraction1;
-                op3.fraction1 -= op1.fraction1;
-
+                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
             }
             else if(op1.sign == '1' && exp_diff > 0)
             {
                 op3.sign = '1';
-
-                op3.fraction2 += op2.fraction2; // tu mozna zastosowac
-                op3.fraction2 -= op1.fraction2; // akcelerancje sprzentowom
-                if(op1.fraction2 > op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
-                }
-                op3.fraction1 += op2.fraction1;
-                op3.fraction1 -= op1.fraction1;
+                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
             }
             else if(op1.sign == '1' && exp_diff < 0)
             {
                 op3.sign = '0';
-
-                op3.fraction2 += op2.fraction2; // tu mozna zastosowac
-                op3.fraction2 -= op1.fraction2; // akcelerancje sprzentowom
-                if(op1.fraction2 > op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
-                }
-                op3.fraction1 += op2.fraction1;
-                op3.fraction1 -= op1.fraction1;
+                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
             }
 
         }
         else // wykladniki sa rowne
         {
-
             op3.exponent = op1.exponent;
             //op3.fraction1 += (1<(20+1)); // 2 domyślne jedynki
 
             if(op1.sign == '0' && op2.sign == '0')
             {
-                 op3.sign = '0';
-
-                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
-                op3.fraction2 += op2.fraction2; // akcelerancje sprzentowom
-                if(op3.fraction2 < op1.fraction2 || op3.fraction2 < op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 += 1; // przeniesienie do 1szej czesci mantysy
-                }
-                op3.fraction1 += op1.fraction1;
-                op3.fraction1 += op2.fraction1;
+                op3.sign = '0';
+                add_op1_op2_fraction(op1_p, op2_p, op3_p);
 
                 if(op3.fraction1 > 1048575) // nadmiar
                 {
@@ -291,14 +276,7 @@ int main()
                op3.sign = '1';
 
 
-                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
-                op3.fraction2 += op2.fraction2; // akcelerancje sprzentowom
-                if(op3.fraction2 < op1.fraction2 || op3.fraction2 < op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 += 1; // przeniesienie do 1szej czesci mantysy
-                }
-                op3.fraction1 += op1.fraction1;
-                op3.fraction1 += op2.fraction1;
+                add_op1_op2_fraction(op1_p, op2_p, op3_p);
 
                 if(op3.fraction1 > 1048575) // nadmiar
                 {
@@ -324,6 +302,7 @@ int main()
 
             }
         }
+
     }
 
 

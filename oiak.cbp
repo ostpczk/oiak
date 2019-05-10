@@ -43,6 +43,8 @@
 		</Linker>
 		<Unit filename="include/xDouble.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="operations.cpp" />
+		<Unit filename="operations.h" />
 		<Unit filename="xDouble.cpp" />
 		<Unit filename="xDouble.h" />
 		<Extensions>
