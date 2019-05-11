@@ -307,16 +307,8 @@ int main()
             if(op1.sign == '0' && op2.sign == '0')
             {
                 op3.sign = '0';
-                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
-                op3.fraction2 += op2.fraction2; // akcelerancje sprzentowom
 
-                if(op3.fraction2 < op1.fraction2 || op3.fraction2 < op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 += 1; // przeniesienie do 1szej czesci mantysy
-                }
-
-                op3.fraction1 += op1.fraction1;
-                op3.fraction1 += op2.fraction1;
+                add_op1_op2_fraction(&op1,&op2,&op3);
 
                 op3.exponent+=1;
                 op3.fraction2>>=1;
@@ -327,16 +319,7 @@ int main()
             {
                 op3.sign = '1';
 
-                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
-                op3.fraction2 += op2.fraction2; // akcelerancje sprzentowom
-
-                if(op3.fraction2 < op1.fraction2 || op3.fraction2 < op2.fraction2) // nadmiar
-                {
-                    op3.fraction1 += 1; // przeniesienie do 1szej czesci mantysy
-                }
-
-                op3.fraction1 += op1.fraction1;
-                op3.fraction1 += op2.fraction1;
+                add_op1_op2_fraction(&op1,&op2,&op3);
 
                 op3.exponent+=1;
                 op3.fraction2>>=1;
@@ -364,16 +347,7 @@ int main()
                         op3.sign = '1';
                     }
 
-                    op3.fraction2 += op1.fraction2; // tu mozna zastosowac
-                    op3.fraction2 -= op2.fraction2; // akcelerancje sprzentowom
-
-                    if(op1.fraction2 < op2.fraction2) // niedomiar
-                    {
-                       op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
-                    }
-
-                    op3.fraction1 += op1.fraction1;
-                    op3.fraction1 -= op2.fraction1;
+                    sub_op1_op2_fraction(&op1,&op2,&op3);
 
                     if(op2.fraction1>op1.fraction1)
                     {
@@ -443,16 +417,7 @@ int main()
                         op3.sign = '0';
                     }
 
-                    op3.fraction2 += op2.fraction2; // tu mozna zastosowac
-                    op3.fraction2 -= op1.fraction2; // akcelerancje sprzentowom
-
-                    if(op2.fraction2 < op1.fraction2) // niedomiar
-                    {
-                       op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
-                    }
-
-                    op3.fraction1 += op2.fraction1;
-                    op3.fraction1 -= op1.fraction1;
+                    sub_op2_op1_fraction(&op1,&op2,&op3);
 
                     if(op1.fraction1>op2.fraction1)
                     {
