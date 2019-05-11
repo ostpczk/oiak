@@ -572,7 +572,7 @@ int main()
     }
     break;
     default:
-    printf("/nWybierz poprawna opcje :-)/n");
+    printf("\nWybierz poprawna opcje :-)\n");
     break;
     }
     /*
