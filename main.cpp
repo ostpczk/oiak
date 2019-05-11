@@ -273,60 +273,206 @@ int main()
             if(op1.sign == '0' && op2.sign == '0')
             {
                 op3.sign = '0';
-                add_op1_op2_fraction(op1_p, op2_p, op3_p);
+                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
+                op3.fraction2 += op2.fraction2; // akcelerancje sprzentowom
 
-                if(op3.fraction1 > 1048575) // nadmiar
+                if(op3.fraction2 < op1.fraction2 || op3.fraction2 < op2.fraction2) // nadmiar
                 {
-                    op3.exponent+=op3.fraction1/(1<<20); // przeniesienie do 1szej czesci mantysy
-                    if(op3.fraction1%2==1)
-                    {
-                        op3.fraction2>>=1;
-                        op3.fraction2+=(1<<31);
-                    }
-                    op3.fraction1>>= 1;
+                    op3.fraction1 += 1; // przeniesienie do 1szej czesci mantysy
+                }
 
-                }
-                if(op1.fraction2 == op2.fraction2)
-                {
-                    op3.sign = '0';
-                    op3.fraction1=op2.fraction1;
-                    op3.fraction2=op2.fraction2;
-                    op3.exponent=op2.exponent+1;// przepełnienie tutaj wchodzi na specjalne liczby
-                }
+                op3.fraction1 += op1.fraction1;
+                op3.fraction1 += op2.fraction1;
+
+                op3.exponent+=1;
+                op3.fraction2>>=1;
+                if(op3.fraction1%2==1) op3.fraction2+=(1<<31);
+                op3.fraction1>>=1;
             }
             else if(op1.sign == '1'&& op2.sign == '1')
             {
-               op3.sign = '1';
+                op3.sign = '1';
 
+                op3.fraction2 += op1.fraction2; // tu mozna zastosowac
+                op3.fraction2 += op2.fraction2; // akcelerancje sprzentowom
 
-                add_op1_op2_fraction(op1_p, op2_p, op3_p);
-
-                if(op3.fraction1 > 1048575) // nadmiar
+                if(op3.fraction2 < op1.fraction2 || op3.fraction2 < op2.fraction2) // nadmiar
                 {
-                    op3.exponent+=op3.fraction1/(1<<20); // przeniesienie do 1szej czesci mantysy
-                    if(op3.fraction1%2==1)
-                    {
-                        op3.fraction2>>=1;
-                        op3.fraction2+=(1<<31);
-                    }
-                    op3.fraction1>>= 1;
+                    op3.fraction1 += 1; // przeniesienie do 1szej czesci mantysy
+                }
 
-                }
-                if(op1.fraction2 == op2.fraction2)
-                {
-                    op3.sign = '0';
-                    op3.fraction1=op2.fraction1;
-                    op3.fraction2=op2.fraction2;
-                    op3.exponent=op2.exponent+1;// przepełnienie tutaj wchodzi na specjalne liczby
-                }
+                op3.fraction1 += op1.fraction1;
+                op3.fraction1 += op2.fraction1;
+
+                op3.exponent+=1;
+                op3.fraction2>>=1;
+                if(op3.fraction1%2==1) op3.fraction2+=(1<<31);
+                op3.fraction1>>=1;
             }
             else if(op1.sign != op2.sign)
             {
+                if(op1.sign=='0')
+                {
+                    if(op1.fraction1>op2.fraction1)
+                    {
+                        op3.sign = '0';
+                    }
+                    else if(op1.fraction1 == op2.fraction1)
+                    {
+                        if(op1.fraction2>op2.fraction2)
+                        {
+                            op3.sign = '0';
+                        }
+                        else op3.sign = '1';
+                    }
+                    else
+                    {
+                        op3.sign = '1';
+                    }
 
+                    op3.fraction2 += op1.fraction2; // tu mozna zastosowac
+                    op3.fraction2 -= op2.fraction2; // akcelerancje sprzentowom
+
+                    if(op1.fraction2 < op2.fraction2) // niedomiar
+                    {
+                       op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
+                    }
+
+                    op3.fraction1 += op1.fraction1;
+                    op3.fraction1 -= op2.fraction1;
+
+                    if(op2.fraction1>op1.fraction1)
+                    {
+                        op3.fraction2=0-op3.fraction2;
+                        if(op1.fraction2 < op2.fraction2) // niedomiar
+                        {
+                            op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
+                        }
+                        op3.fraction1=0-op3.fraction1;
+                    }
+
+                    int counter=0;
+                    bool second = false;
+                    for(counter=20;counter>0;counter--)
+                    {
+                        if((op3.fraction1>>counter)==1)
+                        {
+                            counter=20-counter;
+                            break;
+                        }
+                    }
+                    if(counter==0)
+                    {
+                    for(counter=32;counter>0;counter--)
+                    {
+                        if((op3.fraction2>>counter)==1)
+                        {
+                            second = true;
+                            counter=32-counter+20;
+                            break;
+                        }
+                    }
+                    }
+                    int parm=20;
+                    if(second)
+                    {
+                        parm=52;
+                    }
+                    for(int shift=0;shift<counter;shift++)
+                    {
+                        op3.exponent-=1;
+                        op3.fraction1<<=1;
+                        if(op3.fraction2>>31==1)
+                        {
+                        op3.fraction1+=1;
+                        }
+                        op3.fraction2<<=1;
+
+                    }
+                }
+                else
+                {
+                     if(op1.fraction1>op2.fraction1)
+                    {
+                        op3.sign = '1';
+                    }
+                    else if(op1.fraction1 == op2.fraction1)
+                    {
+                        if(op1.fraction2>op2.fraction2)
+                        {
+                            op3.sign = '1';
+                        }
+                        else op3.sign = '0';
+                    }
+                    else
+                    {
+                        op3.sign = '0';
+                    }
+
+                    op3.fraction2 += op2.fraction2; // tu mozna zastosowac
+                    op3.fraction2 -= op1.fraction2; // akcelerancje sprzentowom
+
+                    if(op2.fraction2 < op1.fraction2) // niedomiar
+                    {
+                       op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
+                    }
+
+                    op3.fraction1 += op2.fraction1;
+                    op3.fraction1 -= op1.fraction1;
+
+                    if(op1.fraction1>op2.fraction1)
+                    {
+                        op3.fraction2=0-op3.fraction2;
+                        if(op2.fraction2 < op1.fraction2) // niedomiar
+                        {
+                            op3.fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
+                        }
+                        op3.fraction1=0-op3.fraction1;
+                    }
+
+                    int counter=0;
+                    bool second = false;
+                    for(counter=20;counter>0;counter--)
+                    {
+                        if((op3.fraction1>>counter)==1)
+                        {
+                            counter=20-counter;
+                            break;
+                        }
+                    }
+                    if(counter==0)
+                    {
+                    for(counter=32;counter>0;counter--)
+                    {
+                        if((op3.fraction2>>counter)==1)
+                        {
+                            second = true;
+                            counter=32-counter+20;
+                            break;
+                        }
+                    }
+                    }
+                    int parm=20;
+                    if(second)
+                    {
+                        parm=52;
+                    }
+                    for(int shift=0;shift<counter;shift++)
+                    {
+                        op3.exponent-=1;
+                        op3.fraction1<<=1;
+                        if(op3.fraction2>>31==1)
+                        {
+                        op3.fraction1+=1;
+                        }
+                        op3.fraction2<<=1;
+
+                    }
+                }
             }
         }
-
     }
+
 
 
 
