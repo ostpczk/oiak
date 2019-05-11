@@ -174,43 +174,46 @@ int main()
         if(op1.exponent != op2.exponent)
         {
             int exp_diff = op1.exponent-op2.exponent; // Obliczanie roznicy wykladnikow.
-            if(exp_diff > 0) // Przesuwamy w prawo (tracac precyzje) by wyrownac wykladniki.
+            int exp_diff_abs; // Wartosc bezwzgledna.
+
+            if(exp_diff < 0) exp_diff_abs = exp_diff * -1; // obliczanie wartości bezwzględnej
+            else exp_diff_abs = exp_diff;
+
+            // Przesuwamy w prawo (tracac precyzje) by wyrownac wykladniki.
+
+            if(exp_diff > 0)
             {
-                for(int i = 0; i < exp_diff; i++)
+                for(int i = 0; i < exp_diff_abs; i++)
                 {
                     op2.fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
-                    if (op1.fraction1 % 2 == 1)     // czy ostatni bit to 1?
+                    if (op2.fraction1 % 2 == 1)     // czy ostatni bit to 1?
                         op2.fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
                     op2.fraction1 >>= 1;
                 }
             }
-            else
+            else//if(exp_diff < 0)
             {
-                exp_diff*=-1;
-                for(int i = 0; i < exp_diff; i++)
+                for(int i = 0; i < exp_diff_abs; i++)
                 {
-                    op1.fraction2 >>= 1; // roundTowardZero - przez obciecie
-                    if (op1.fraction1 % 2 == 1)
-                        op1.fraction2 += (1 << 31);
+                    op1.fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
+                    if (op1.fraction1 % 2 == 1)     // czy ostatni bit to 1?
+                        op1.fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
                     op1.fraction1 >>= 1;
                 }
-                op3.exponent = (op1.exponent = op2.exponent);
-                exp_diff*=-1;
-           //     op3.exponent>>=exp_diff;
             }
-
             op3.exponent = (op1.exponent = op2.exponent);
 
             op3.fraction1 += (1 << 20); // dodanie domyślnej jedynki op1.
-            if(exp_diff < 20)
+
+            if(exp_diff_abs < 20)
             {
                 // Obie jedynki zostaną dodane w pierwszej czastce.
-                op3.fraction1 += (1 << (20 - exp_diff));
+                op3.fraction1 += (1 << (20 - exp_diff_abs));
             }
             else
             {
                 // Jedynka liczby op2 zostanie dodana w drugiej części.
-                op3.fraction2 += (1 << (52 - exp_diff));
+                op3.fraction2 += (1 << (52 - exp_diff_abs));
             }
 
             if(op1.sign == op2.sign)
@@ -218,6 +221,8 @@ int main()
                 op3.sign = op1.sign;
                 add_op1_op2_fraction(op1_p, op2_p, op3_p);
             }
+
+
             // a co jesli znaki są przeciwne?
             else if(op1.sign == '0' && exp_diff > 0)
             {
@@ -241,11 +246,29 @@ int main()
                 sub_op1_op2_fraction(op1_p, op2_p, op3_p);
             }
 
+        // Wyrownywanie potegi tak, by przed mantyse wystawala ostatnia, domyslna "1".
+
+        int fract_dist = op3.fraction1>>20;
+        if(fract_dist > 1)
+        {
+                do
+                {
+                    op3.fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
+                    if (op3.fraction1 % 2 == 1)     // czy ostatni bit to 1?
+                        op3.fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
+                    op3.fraction1 >>= 1;
+                    op3.exponent++;
+                    fract_dist >>= 1;
+
+                } while (fract_dist > 1);
+        }
+
+        op3.fraction1 = op3.fraction1 & ( (1 << 20) - 1 );  // wyczyszczenie pozostalych 1-ek przed mantysa
+
         }
         else // wykladniki sa rowne
         {
             op3.exponent = op1.exponent;
-            //op3.fraction1 += (1<(20+1)); // 2 domyślne jedynki
 
             if(op1.sign == '0' && op2.sign == '0')
             {
@@ -327,6 +350,17 @@ int main()
         display_number >>= 1;
     }
 
+        char fraction0_s[13];
+        fraction0_s[12] = '\0';
+
+    for(int i = 11; i >= 0; i--)
+    {
+        if (display_number % 2 == 0) fraction0_s[i] = '0';
+        else fraction0_s[i] = '1';
+        display_number >>= 1;
+    }
+
+
     display_number = op3.exponent;
     for(int i = 10; i >= 0; i--)
     {
@@ -336,7 +370,7 @@ int main()
     }
 
     printf("Suma:\n");
-    printf("%c|%s|%s %s\n",op3.sign,op3.exponent_s,op3.fraction1_s,op3.fraction2_s);
+    printf("%c|%s|(%s)%s %s\n",op3.sign,op3.exponent_s,fraction0_s, op3.fraction1_s,op3.fraction2_s);
 
     /*
         ////////////////////////////////////////////
