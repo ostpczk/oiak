@@ -190,6 +190,23 @@ int main()
                         op2.fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
                     op2.fraction1 >>= 1;
                 }
+                op3.exponent = (op2.exponent = op1.exponent);
+
+                op1.fraction1 += (1 << 20); // dodanie domyślnej jedynki op1.
+
+                if(exp_diff_abs < 20)
+                {
+                    // Obie jedynki zostaną dodane w pierwszej czastce.
+                    op2.fraction1 += (1 << (20 - exp_diff_abs));
+                }
+                else
+                {
+                    // Jedynka liczby op2 zostanie dodana w drugiej części.
+                    op2.fraction2 += (1 << (52 - exp_diff_abs));
+                    if (op2.fraction2 < (1 << (52 - exp_diff_abs)) )
+                        op2.fraction1++; // nadmiar
+                }
+
             }
             else//if(exp_diff < 0)
             {
@@ -200,28 +217,31 @@ int main()
                         op1.fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
                     op1.fraction1 >>= 1;
                 }
-            }
-            op3.exponent = (op1.exponent = op2.exponent);
+                op3.exponent = (op1.exponent = op2.exponent);
 
-            op3.fraction1 += (1 << 20); // dodanie domyślnej jedynki op1.
+                op2.fraction1 += (1 << 20); // dodanie domyślnej jedynki op1.
 
-            if(exp_diff_abs < 20)
-            {
-                // Obie jedynki zostaną dodane w pierwszej czastce.
-                op3.fraction1 += (1 << (20 - exp_diff_abs));
+                if(exp_diff_abs < 20)
+                {
+                    // Obie jedynki zostaną dodane w pierwszej czastce.
+                    op1.fraction1 += (1 << (20 - exp_diff_abs));
+                }
+                else
+                {
+                    // Jedynka liczby op2 zostanie dodana w drugiej części.
+                    op1.fraction2 += (1 << (52 - exp_diff_abs));
+                    if (op1.fraction2 < (1 << (52 - exp_diff_abs)) )
+                        op1.fraction1++; // nadmiar
+                }
+
             }
-            else
-            {
-                // Jedynka liczby op2 zostanie dodana w drugiej części.
-                op3.fraction2 += (1 << (52 - exp_diff_abs));
-            }
+
 
             if(op1.sign == op2.sign)
             {
                 op3.sign = op1.sign;
                 add_op1_op2_fraction(op1_p, op2_p, op3_p);
             }
-
 
             // a co jesli znaki są przeciwne?
             else if(op1.sign == '0' && exp_diff > 0)
@@ -233,7 +253,7 @@ int main()
             else if(op1.sign == '0' && exp_diff < 0)
             {
                 op3.sign = '1';
-                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
+                sub_op2_op1_fraction(op1_p, op2_p, op3_p);
             }
             else if(op1.sign == '1' && exp_diff > 0)
             {
@@ -243,12 +263,13 @@ int main()
             else if(op1.sign == '1' && exp_diff < 0)
             {
                 op3.sign = '0';
-                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
+                sub_op2_op1_fraction(op1_p, op2_p, op3_p);
             }
 
         // Wyrownywanie potegi tak, by przed mantyse wystawala ostatnia, domyslna "1".
 
-        int fract_dist = op3.fraction1>>20;
+        int fract_dist = op3.fraction1>>20; // fraction distance - odległość
+
         if(fract_dist > 1)
         {
                 do
@@ -261,6 +282,19 @@ int main()
                     fract_dist >>= 1;
 
                 } while (fract_dist > 1);
+        }
+        else if(fract_dist < 1)
+        {
+                do
+                {
+                    op3.fraction1 <<= 1;
+                    if (op3.fraction2 >> 31 == 1)     // czy ostatni bit to 1?
+                        op3.fraction1 += 1; // przenosimy na poczatek czesci 2
+                    op3.fraction2 <<= 1;
+                    op3.exponent--;
+                    fract_dist = op3.fraction1>>20;
+
+                } while (fract_dist != 1);
         }
 
         op3.fraction1 = op3.fraction1 & ( (1 << 20) - 1 );  // wyczyszczenie pozostalych 1-ek przed mantysa
@@ -371,6 +405,19 @@ int main()
 
     printf("Suma:\n");
     printf("%c|%s|(%s)%s %s\n",op3.sign,op3.exponent_s,fraction0_s, op3.fraction1_s,op3.fraction2_s);
+
+    d64i.integer_number = 0;
+    if (op3.sign == '1')
+        d64i.integer_number += 1 << 11;
+
+    d64i.integer_number += op3.exponent;
+    d64i.integer_number <<= 20;
+    d64i.integer_number += op3.fraction1;
+    d64i.integer_number <<= 32;
+    d64i.integer_number += op3.fraction2;
+
+    printf("%.32lf\n",d64i.double_number);
+
 
     /*
         ////////////////////////////////////////////
