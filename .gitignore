@@ -54,5 +54,6 @@ dkms.conf
 
 
 # custom
-*.layout
-*.depend
+oiak
+oiak.layout
+oiak.depend
