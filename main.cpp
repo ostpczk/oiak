@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
-#include <mmintrin.h>
-#include <immintrin.h>
-#include <xmmintrin.h>
-#include <emmintrin.h>
 
 #include "operations.h"
 
@@ -297,8 +293,6 @@ int main()
                 } while (fract_dist != 1);
         }
 
-        op3.fraction1 = op3.fraction1 & ( (1 << 20) - 1 );  // wyczyszczenie pozostalych 1-ek przed mantysa
-
         }
         else // wykladniki sa rowne
         {
@@ -508,7 +502,7 @@ int main()
     }
 
 
-
+    op3.fraction1 = op3.fraction1 & ( (1 << 20) - 1 );  // wyczyszczenie pozostalych 1-ek przed mantysa
 
 
     fflush(stdout);
