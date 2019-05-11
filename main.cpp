@@ -56,7 +56,8 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
     }
 
     printf("Suma:\n");
-    printf("%c|%s|(%s)%s %s\n",op3->sign,op3->exponent_s,fraction0_s, op3->fraction1_s,op3->fraction2_s);
+    printf("%c|%s|%s %s\n",op3->sign,op3->exponent_s, op3->fraction1_s,op3->fraction2_s);
+    //printf("%c|%s|(%s)%s %s\n",op3->sign,op3->exponent_s,fraction0_s, op3->fraction1_s,op3->fraction2_s);
 
     d64i.integer_number = 0;
     if (op3->sign == '1')
@@ -570,99 +571,7 @@ int main()
     printf("\nWybierz poprawna opcje :-)\n");
     break;
     }
-    /*
-        ////////////////////////////////////////////
-        // Konwersja do rejestrów i dodawanie mantys.
 
-        union{ __m64 mantissas; uint32_t addends[2];} ma1, ma2, ma3; // 12|20|32|12|20|32 bity
-
-
-        ma1.addends[0] = 0;
-        for(uint32_t i = 0; i < 20; i++){
-            if(op1.fraction1_s[i] == '1')
-                ma1.addends[0] += (1 << (20-i));
-        }
-
-        ma1.addends[1] = 0;
-        for(uint32_t i = 0; i < 32; i++){
-            if(op1.fraction2_s[i] == '1')
-                ma1.addends[1] += (1 << (32-i));
-        }
-        ma2.addends[0] = 0;
-        for(uint32_t i = 0; i < 20; i++){
-            if(op2.fraction1_s[i] == '1')
-                ma2.addends[0] += (1 << (20-i));
-        }
-
-        ma2.addends[1] = 0;
-        for(uint32_t i = 0; i < 32; i++){
-            if(op2.fraction2_s[i] == '1')
-                ma2.addends[1] += (1 << (32-i));
-        }
-
-        printf("%u %u %u %u\n", ma1.addends[0], ma1.addends[1], ma2.addends[0], ma2.addends[1]);
-
-        __m64 a, b, c;
-
-        a = ma1.mantissas;
-        b = ma2.mantissas;
-
-        if(op1.exponent < op2.exponent)
-        {
-            op3.exponent = op2.exponent;
-            op3.sign = op2.sign;
-            int diff = op2.exponent - op1.exponent;
-            a = _m_psrlqi(a,diff);    }
-        else
-        {
-            op3.exponent = op1.exponent;
-            op3.sign = op1.sign;
-            int diff = op1.exponent - op2.exponent;
-            b = _m_psrlqi(b,diff);
-        }
-
-
-        if(op1.sign == op2.sign)
-        {
-        c = _mm_add_pi32(a,b); // sumujemy wartosci obu mantys
-        }
-        else
-        {
-        c = _mm_sub_pi32(a,b);
-        }
-
-        if((ma3.addends[0] % (1 << 22)) >= (1 << 21))
-        {
-        op3.exponent++;
-        c = _m_psrlqi(c,1); // przesuniecie w prawo o 1 pozycje, wypelnienie zerami
-        }
-
-        ma3.mantissas = c;
-
-        for (int i = 0; i < 32; i++)
-        {
-            if( decode_number % 2 == 0) op3.fraction2_s[31-i] = '0';
-            else op3.fraction2_s[31-i] = '1';
-            decode_number >>= 1;
-        }
-
-        decode_number = ma3.addends[0];
-        for (int i = 0; i < 20; i++)
-        {
-            if( decode_number % 2 == 0) op3.fraction1_s[19-i] = '0';
-            else op3.fraction1_s[19-i] = '1';
-            decode_number >>= 1;
-        }
-
-        decode_number = op3.exponent;
-        for (int i = 0; i < 12; i++)
-        {
-            if( decode_number % 2 == 0) op3.exponent_s[10-i] = '0';
-            else op3.exponent_s[10-i] = '1';
-            decode_number >>= 1;
-        }
-    */
-//    printf("%c|%s|%s %s\n",op3.sign,op3.exponent_s,op3.fraction1_s,op3.fraction2_s);
     return 0;
 
 }
