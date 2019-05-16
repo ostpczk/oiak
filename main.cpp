@@ -69,7 +69,7 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
     d64i.integer_number <<= 32;
     d64i.integer_number += op3->fraction2;
 
-    printf("%.32lf\n",d64i.double_number);
+    printf("%.32le\n",d64i.double_number);
 }
 
 
@@ -180,8 +180,8 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,x
 void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,xDouble* op3_p)
 {
     ///////////////////////////////////////////////////////
-    // Dodawanie po normalności. Bez użycia akcelerancji.//
-    // Należy to potem zankcelerownać.                   //
+    // Dodawanie.
+    // Dodawanie i odejmowanie mantys zaimplementowane jest w oddzielnych funkcjach
     ///////////////////////////////////////////////////////
 
     op3->sign = '0';
@@ -212,7 +212,7 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
 
             if(exp_diff > 0)
             {
-                for(int i = 0; i < exp_diff_abs; i++)
+                for(int i = 0; i < exp_diff_abs && i < 52; i++)
                 {
                     op2->fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
                     if (op2->fraction1 % 2 == 1)     // czy ostatni bit to 1?
@@ -228,7 +228,7 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
                     // Obie jedynki zostaną dodane w pierwszej czastce.
                     op2->fraction1 += (1 << (20 - exp_diff_abs));
                 }
-                else
+                else if (exp_diff_abs < 53)
                 {
                     // Jedynka liczby op2 zostanie dodana w drugiej części.
                     op2->fraction2 += (1 << (52 - exp_diff_abs));
@@ -337,10 +337,21 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
 
                 add_op1_op2_fraction(op1,op2,op3);
 
-                op3->exponent+=1;
-                op3->fraction2>>=1;
-                if(op3->fraction1%2==1) op3->fraction2+=(1<<31);
-                op3->fraction1>>=1;
+                if(op3->exponent != 0)
+                {
+                    op3->exponent+=1;
+                    op3->fraction2>>=1;
+                    if(op3->fraction1%2==1) op3->fraction2+=(1<<31);
+                        op3->fraction1>>=1;
+                }
+                else
+                {
+                    if(op3->fraction1 >> 20 == 1)
+                    {
+                        op3->exponent+=1;
+                    }
+                }
+
             }
             else if(op1->sign == '1'&& op2->sign == '1')
             {
@@ -378,7 +389,7 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
 
                     if(op2->fraction1>op1->fraction1)
                     {
-                        op3->fraction2=0-op3->fraction2;
+                        op3->fraction2=0-op3->fraction2;    // xor
                         if(op1->fraction2 < op2->fraction2) // niedomiar
                         {
                             op3->fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
@@ -413,19 +424,21 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
                     {
                         parm=52;
                     }
-                    for(int shift=0;shift<counter;shift++)
+                    for(int shift=0; shift<counter && op3->exponent != 0; shift++)
                     {
                         op3->exponent-=1;
-                        op3->fraction1<<=1;
-                        if(op3->fraction2>>31==1)
+                        if(op3->exponent !=0)
                         {
-                        op3->fraction1+=1;
+                            op3->fraction1<<=1;
+                            if(op3->fraction2>>31==1)
+                            {
+                                op3->fraction1+=1;
+                            }
+                            op3->fraction2<<=1;
                         }
-                        op3->fraction2<<=1;
-
                     }
                 }
-                else
+                else // if (op1->sign == '1')
                 {
                      if(op1->fraction1>op2->fraction1)
                     {
