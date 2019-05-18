@@ -10,17 +10,12 @@
 
 #pragma STDC FENV_ACCESS on
 
-double double1, double2, double3;
+double testdouble1, testdouble2, testdouble3;
 
-union d64i_t
-    {
-        uint64_t integer_number;
-        double double_number;
-    } d64i; // unia sluzy do wydobycia bitow
-    // reprezentacja 64-bitowa kopiowana jest bit po bicie a nastepnie odczytywana jako liczba calkowita
-  uint64_t display_number;
+uint64_t display_number;
+d64i_t d64i;
 
-void out(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,xDouble* op3_p)
+void out(xDouble* op1, xDouble* op2, xDouble* op3)
 {
     fflush(stdout);
 /////////////// DRUkuj w postaci binarnej.
@@ -75,19 +70,19 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
     d64i.integer_number += op3->fraction2;
 
     printf("UZYSKANA WARTOSC: %.32le\n",d64i.double_number);
-    printf("POZADANA WARTOSC: %.32le\n", double3);
+    printf("POZADANA WARTOSC: %.32le\n", testdouble3);
 }
 
 
 
-void in(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,xDouble* op3_p)
+void in(xDouble* op1, xDouble* op2, xDouble* op3)
 {
     double input;
 
     printf("Podaj pierwsza liczbe:");
     scanf("%lf",&input);
 
-    double1 = input;
+    testdouble1 = input;
 
     d64i.double_number = input;
     display_number = d64i.integer_number;
@@ -140,7 +135,7 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,x
     printf("Podaj druga liczbe:");
     scanf("%lf",&input);
 
-    double2 = input;
+    testdouble2 = input;
 
     d64i.double_number = input;
     display_number = d64i.integer_number;
@@ -187,7 +182,7 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,x
 }
 
 
-void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,xDouble* op3_p)
+xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,xDouble* op3_p)
 {
     ///////////////////////////////////////////////////////
     // Dodawanie.
@@ -279,30 +274,30 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
             if(op1->sign == op2->sign)
             {
                 op3->sign = op1->sign;
-                add_op1_op2_fraction(op1_p, op2_p, op3_p);
+                add_op1_op2_fraction(op1, op2, op3);
             }
 
             // a co jesli znaki są przeciwne?
             else if(op1->sign == '0' && exp_diff > 0)
             {
                 op3->sign = '0';
-                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
+                sub_op1_op2_fraction(op1, op2, op3);
 
             }
             else if(op1->sign == '0' && exp_diff < 0)
             {
                 op3->sign = '1';
-                sub_op2_op1_fraction(op1_p, op2_p, op3_p);
+                sub_op2_op1_fraction(op1, op2, op3);
             }
             else if(op1->sign == '1' && exp_diff > 0)
             {
                 op3->sign = '1';
-                sub_op1_op2_fraction(op1_p, op2_p, op3_p);
+                sub_op1_op2_fraction(op1, op2, op3);
             }
             else if(op1->sign == '1' && exp_diff < 0)
             {
                 op3->sign = '0';
-                sub_op2_op1_fraction(op1_p, op2_p, op3_p);
+                sub_op2_op1_fraction(op1, op2, op3);
             }
 
         // Wyrownywanie potegi tak, by przed mantyse wystawala ostatnia, domyslna "1".
@@ -521,6 +516,8 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
         }
     }
     op3->fraction1 = op3->fraction1 & ( (1 << 20) - 1 );  // wyczyszczenie pozostalych 1-ek przed mantysa
+
+    return op3;
 }
 
 int menu()
@@ -529,6 +526,7 @@ int picked_option=0;
 printf("\nCo byc chcial uczynic\n");
 printf("1-Dodawanie\n");
 printf("2-Odejmowanie\n");
+printf("6-Test\n");
 
 scanf("%d", &picked_option);
 return picked_option;
@@ -577,30 +575,30 @@ int main()
     {
     case 1: // dodawanie
     {
-    in(&op1,&op2,&op3,op1_p,op2_p,op3_p);
-    double3 = double1 + double2; // benchmark
-    add(&op1,&op2,&op3,op1_p,op2_p,op3_p);
-    out(&op1,&op2,&op3,op1_p,op2_p,op3_p);
+    in(op1_p,op2_p,op3_p);
+    testdouble3 = testdouble1 + testdouble2; // benchmark
+    add(op1_p,op2_p,op3_p);
+    out(op1_p,op2_p,op3_p);
     }
     break;
     case 2: // odjemowanie
     {
-    in(&op1,&op2,&op3,op1_p,op2_p,op3_p);
+    in(op1_p,op2_p,op3_p);
     if(op2.sign=='0')
         op2.sign='1';
     else
         op2.sign='0';
-    double3 = double1 - double2; // benchmark
-    add(&op1,&op2,&op3,op1_p,op2_p,op3_p);
-    out(&op1,&op2,&op3,op1_p,op2_p,op3_p);
+    testdouble3 = testdouble1 - testdouble2; // benchmark
+    add(op1_p,op2_p,op3_p);
+    out(op1_p,op2_p,op3_p);
     }
     break;
     default:
     printf("\nWybierz poprawna opcje :-)\n");
     break;
-    case 5:
+    case 6:
     {
-
+        test();
     }
     break;
     }

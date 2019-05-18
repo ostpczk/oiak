@@ -1,10 +1,11 @@
 CC = g++
+CXXFLAGS = -m32 -mmmx -pg
 
-main: main.o xDouble.o
-	$(CC) -m32 -o oiak main.o operations.o
+main: main.o operations.o
+	$(CC) $(CXXFLAGS) -o oiak main.o operations.o
 
 main.o: main.cpp
-	$(CC) -m32 -c main.cpp
+	$(CC) $(CXXFLAGS) -c main.cpp
 
 operations.o: operations.cpp operations.h
-	$(CC) -m32 -c operations.cpp
+	$(CC) $(CXXFLAGS) -c operations.cpp
