@@ -5,11 +5,11 @@
 void add_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 {
 
-    __m64 reg1 = _mm_set_pi32 (op1->fraction1, op1->fraction2);
+    __m64 reg1 = _mm_set_pi32 (op1->fraction1, op1->fraction2); //op1[fraction2, fraction1]
     __m64 reg2 = _mm_set_pi32 (op2->fraction1, op2->fraction2);
     __m64 reg3 = _mm_add_pi32(reg1, reg2);
 
-    if(reg3[0] < reg1[0] || reg3[0] < reg2[0]) // nadmiar
+    if((uint32_t) reg3[0] < (uint32_t) reg1[0] || (uint32_t) reg3[0] < (uint32_t) reg2[0]) // nadmiar
     {
         reg3[1] +=1; // przeniesienie do 1szej czesci mantysy
     }
@@ -27,7 +27,7 @@ void sub_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
     __m64 reg2 = _mm_set_pi32 (op2->fraction1, op2->fraction2);
     __m64 reg3 = _mm_sub_pi32(reg1, reg2);
 
-    if(reg2[0] > reg1[0]) // nadmiar
+    if((uint32_t) reg2[0] > (uint32_t) reg1[0]) // nadmiar
     {
         reg3[1] -=1; // przeniesienie do 1szej czesci mantysy
     }
@@ -44,7 +44,7 @@ void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
     __m64 reg2 = _mm_set_pi32 (op2->fraction1, op2->fraction2);
     __m64 reg3 = _mm_sub_pi32(reg2, reg1);
 
-    if(reg1[0] > reg2[0]) // nadmiar
+    if( (uint32_t) reg1[0] > (uint32_t) reg2[0]) // nadmiar
     {
         reg3[1] -=1; // przeniesienie do 1szej czesci mantysy
     }

@@ -2,10 +2,15 @@
 #include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
+#include <fenv.h>
 
 #include "operations.h"
 
 #define FLT_RADIX 2
+
+#pragma STDC FENV_ACCESS on
+
+double double1, double2, double3;
 
 union d64i_t
     {
@@ -69,7 +74,8 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
     d64i.integer_number <<= 32;
     d64i.integer_number += op3->fraction2;
 
-    printf("%.32le\n",d64i.double_number);
+    printf("UZYSKANA WARTOSC: %.32le\n",d64i.double_number);
+    printf("POZADANA WARTOSC: %.32le\n", double3);
 }
 
 
@@ -80,6 +86,8 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,x
 
     printf("Podaj pierwsza liczbe:");
     scanf("%lf",&input);
+
+    double1 = input;
 
     d64i.double_number = input;
     display_number = d64i.integer_number;
@@ -131,6 +139,8 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,x
 
     printf("Podaj druga liczbe:");
     scanf("%lf",&input);
+
+    double2 = input;
 
     d64i.double_number = input;
     display_number = d64i.integer_number;
@@ -223,10 +233,10 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
 
                 op1->fraction1 += (1 << 20); // dodanie domyślnej jedynki op1.
 
-                if(exp_diff_abs < 20)
+                if(exp_diff_abs < 21)
                 {
                     // Obie jedynki zostaną dodane w pierwszej czastce.
-                    op2->fraction1 += (1 << (20 - exp_diff_abs));
+                    op2->fraction1 += (1 << (20 - (exp_diff_abs)));
                 }
                 else if (exp_diff_abs < 53)
                 {
@@ -250,10 +260,10 @@ void add(xDouble* op1, xDouble* op2, xDouble* op3,xDouble* op1_p,xDouble* op2_p,
 
                 op2->fraction1 += (1 << 20); // dodanie domyślnej jedynki op1.
 
-                if(exp_diff_abs < 20)
+                if(exp_diff_abs < 21)
                 {
                     // Obie jedynki zostaną dodane w pierwszej czastce.
-                    op1->fraction1 += (1 << (20 - exp_diff_abs));
+                    op1->fraction1 += (1 <<  (20 - exp_diff_abs));
                 }
                 else
                 {
@@ -527,6 +537,7 @@ return picked_option;
 
 int main()
 {
+
     xDouble op1;
     xDouble op2;
     xDouble op3;
@@ -560,28 +571,37 @@ int main()
     xDouble* op2_p = &op2;
     xDouble* op3_p = &op3;
 
+    std::fesetround(FE_TOWARDZERO);
+
     switch(menu())
     {
-    case 1:
+    case 1: // dodawanie
     {
     in(&op1,&op2,&op3,op1_p,op2_p,op3_p);
+    double3 = double1 + double2; // benchmark
     add(&op1,&op2,&op3,op1_p,op2_p,op3_p);
     out(&op1,&op2,&op3,op1_p,op2_p,op3_p);
     }
     break;
-    case 2:
+    case 2: // odjemowanie
     {
     in(&op1,&op2,&op3,op1_p,op2_p,op3_p);
     if(op2.sign=='0')
-    op2.sign='1';
+        op2.sign='1';
     else
-    op2.sign='0';
+        op2.sign='0';
+    double3 = double1 - double2; // benchmark
     add(&op1,&op2,&op3,op1_p,op2_p,op3_p);
     out(&op1,&op2,&op3,op1_p,op2_p,op3_p);
     }
     break;
     default:
     printf("\nWybierz poprawna opcje :-)\n");
+    break;
+    case 5:
+    {
+
+    }
     break;
     }
 
