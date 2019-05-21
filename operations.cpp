@@ -58,6 +58,7 @@ void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 void test()
 {
     double testdouble1, testdouble2, testdouble3, testdouble4;
+
     int correct = 0;
     int incorrect = 0;
 
