@@ -72,6 +72,7 @@ void test()
 
     char operation;
     FILE *datafile = fopen("data.txt", "r");
+
     do{
         //fscanf(datafile, " %c %lf %lf", &operation, &testdouble1, &testdouble2);
         op1.exponent = 0;
@@ -89,8 +90,8 @@ void test()
         char input_string[256];
         fgets(input_string, 256, datafile);
         operation = input_string[0];
-
-        sscanf(input_string, " %s %lf %lf", &operation, &testdouble1, &testdouble2);
+        if (operation != 'A' && operation != 'S') continue;
+        sscanf(input_string, " %c %lf %lf ", &operation, &testdouble1, &testdouble2);
 
         double input = testdouble1;
 
