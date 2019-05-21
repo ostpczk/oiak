@@ -10,7 +10,7 @@
 
 #pragma STDC FENV_ACCESS on
 
-double testdouble1, testdouble2, testdouble3;
+double testdouble1, testdouble2, testdouble3,testdouble4;
 
 uint64_t display_number;
 d64i_t d64i;
@@ -68,6 +68,8 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3)
     d64i.integer_number += op3->fraction1;
     d64i.integer_number <<= 32;
     d64i.integer_number += op3->fraction2;
+
+    testdouble4 = (double) d64i.double_number;
 
     printf("UZYSKANA WARTOSC: %.32le\n",d64i.double_number);
     printf("POZADANA WARTOSC: %.32le\n", testdouble3);
