@@ -571,7 +571,7 @@ int main()
     xDouble* op2_p = &op2;
     xDouble* op3_p = &op3;
 
-    std::fesetround(FE_TOWARDZERO);
+    std::fesetround(FE_TONEAREST);
 
     switch(menu())
     {
@@ -579,6 +579,7 @@ int main()
     {
     in(op1_p,op2_p,op3_p);
     testdouble3 = testdouble1 + testdouble2; // benchmark
+    std::fesetround(FE_TOWARDZERO);
     add(op1_p,op2_p,op3_p);
     out(op1_p,op2_p,op3_p);
     }
@@ -591,6 +592,7 @@ int main()
     else
         op2.sign='0';
     testdouble3 = testdouble1 - testdouble2; // benchmark
+    std::fesetround(FE_TOWARDZERO);
     add(op1_p,op2_p,op3_p);
     out(op1_p,op2_p,op3_p);
     }
