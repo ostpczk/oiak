@@ -411,16 +411,22 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                         op3->sign = '1';
                     }
 
-                    sub_op1_op2_fraction(op1,op2,op3);
+
+                    if(op3->exponent == 0 && op2->fraction1 > op1->fraction1 || op2->fraction2 > op1->fraction2)
+                    {
+                        sub_op2_op1_fraction(op1,op2,op3);
+                    }
+                    else
+                        sub_op1_op2_fraction(op1,op2,op3);
 
                     if(op2->fraction1>op1->fraction1)
                     {
-                        op3->fraction2=0-op3->fraction2;    // xor
-                        if(op1->fraction2 < op2->fraction2) // niedomiar
-                        {
-                            op3->fraction1 += 1; // przeniesienie do 1szej czesci mantysy
-                        }
-                        op3->fraction1=0-op3->fraction1;
+                            op3->fraction2=0-op3->fraction2;    // NOT / XOR 0
+                            if(op1->fraction2 < op2->fraction2) // niedomiar
+                            {
+                                op3->fraction1 += 1; // przeniesienie do 1szej czesci mantysy
+                            }
+                            op3->fraction1=0-op3->fraction1;
                     }
 
                     int counter=0;

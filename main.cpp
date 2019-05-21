@@ -538,7 +538,7 @@ return picked_option;
 int main()
 {
 
-    int fesetround (FE_TOWARDZERO);
+    fesetround(FE_TOWARDZERO);
     xDouble op1;
     xDouble op2;
     xDouble op3;
