@@ -58,6 +58,7 @@ void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 void test()
 {
     double testdouble1, testdouble2, testdouble3, testdouble4;
+
     int correct = 0;
     int incorrect = 0;
 
@@ -91,7 +92,6 @@ void test()
         operation = input_string[0];
 
         sscanf(input_string, " %s %lf %lf", &operation, &testdouble1, &testdouble2);
-
         double input = testdouble1;
 
         d64i.double_number = input;
@@ -173,14 +173,14 @@ void test()
 
         testdouble4 = (double) d64i.double_number;
 
-        printf("%e", testdouble1);
+        printf("%.20e", testdouble1);
 
         if(operation == 'A')
             printf(" + ");
         else if (operation == 'S')
             printf(" - ");
 
-        printf("%e = %e <=> %e ? ", testdouble2, testdouble3, d64i.double_number);
+        printf("%.20e = %.20e <=> %.20e ? ", testdouble2, testdouble3, d64i.double_number);
 
         if (testdouble3 == d64i.double_number)
         {
