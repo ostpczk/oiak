@@ -1,5 +1,5 @@
 CC = g++
-CXXFLAGS = -m32 -mmmx -pg
+CXXFLAGS = -m32 -mmmx -pg -Wall
 
 main: main.o operations.o
 	$(CC) $(CXXFLAGS) -o oiak main.o operations.o

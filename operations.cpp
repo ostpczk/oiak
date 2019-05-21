@@ -57,49 +57,40 @@ void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 
 void test()
 {
-    double testdouble1, testdouble2, testdouble3;
+    double testdouble1, testdouble2, testdouble3, testdouble4;
+    int correct = 0;
+    int incorrect = 0;
 
     xDouble op1;
     xDouble op2;
     xDouble op3;
-
-    op1.exponent = 0;
-    op1.fraction1 = 0;
-    op1.fraction2 = 0;
-
-    op2.exponent = 0;
-    op2.fraction1 = 0;
-    op2.fraction2 = 0;
-
-    op3.exponent = 0;
-    op3.fraction1 = 0;
-    op3.fraction2 = 0;
-
     xDouble* op1_p = &op1;
     xDouble* op2_p = &op2;
     xDouble* op3_p = &op3;
+
+    xDouble* sum;
 
     char operation;
     FILE *datafile = fopen("data.txt", "r");
     do{
         //fscanf(datafile, " %c %lf %lf", &operation, &testdouble1, &testdouble2);
+        op1.exponent = 0;
+        op1.fraction1 = 0;
+        op1.fraction2 = 0;
+
+        op2.exponent = 0;
+        op2.fraction1 = 0;
+        op2.fraction2 = 0;
+
+        op3.exponent = 0;
+        op3.fraction1 = 0;
+        op3.fraction2 = 0;
 
         char input_string[256];
         fgets(input_string, 256, datafile);
         operation = input_string[0];
 
         sscanf(input_string, " %s %lf %lf", &operation, &testdouble1, &testdouble2);
-
-        if(operation == 'A')
-        {
-            testdouble3 = testdouble1 + testdouble2;
-        }
-        else if(operation == 'S')
-        {
-            testdouble3 = testdouble1 - testdouble2;
-            if(op2.sign == '0') op2.sign = '1';
-            else op2.sign = '0';
-        }
 
         double input = testdouble1;
 
@@ -156,7 +147,20 @@ void test()
         if (display_number % 2 == 0) op2.sign = '0';
         else op2.sign = '1';
 
-        xDouble *sum = add(op1_p, op2_p, op3_p);
+        if(operation == 'A')
+        {
+            testdouble3 = testdouble1 + testdouble2;
+        }
+        else if(operation == 'S')
+        {
+            testdouble3 = testdouble1 - testdouble2;
+            if(op2.sign == '0') op2.sign = '1';
+            else op2.sign = '0';
+        }
+        else continue;
+
+
+        sum = add(op1_p, op2_p, op3_p);
         d64i.integer_number = 0;
         if (sum->sign == '1')
             d64i.integer_number += 1 << 11;
@@ -167,15 +171,31 @@ void test()
         d64i.integer_number <<= 32;
         d64i.integer_number += sum->fraction2;
 
+        testdouble4 = (double) d64i.double_number;
+
+        printf("%e", testdouble1);
+
         if(operation == 'A')
-            printf("%lf + %lf = %lf <=> %lf ? ",testdouble1, testdouble2, testdouble3, d64i.double_number);
+            printf(" + ");
         else if (operation == 'S')
-            printf("%lf - %lf = %lf <=> %lf ? ",testdouble1, testdouble2, testdouble3, d64i.double_number);
-        if (testdouble3 == d64i.double_number) printf("OK\n");
-        else printf("NO\n");
+            printf(" - ");
+
+        printf("%e = %e <=> %e ? ", testdouble2, testdouble3, d64i.double_number);
+
+        if (testdouble3 == d64i.double_number)
+        {
+            printf("OK\n");
+            correct++;
+        }
+        else
+        {
+            printf("NO\n");
+            incorrect++;
+        }
     }
     while(feof(datafile) == 0);
 
+    printf("Poprawnych: %d; niepoprawnych: %d\n", correct, incorrect);
 
     fclose(datafile);
 }
