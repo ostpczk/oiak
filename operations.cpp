@@ -174,14 +174,14 @@ void test()
 
         testdouble4 = (double) d64i.double_number;
 
-        printf("%e", testdouble1);
+        printf("%.20e", testdouble1);
 
         if(operation == 'A')
             printf(" + ");
         else if (operation == 'S')
             printf(" - ");
 
-        printf("%e = %e <=> %e ? ", testdouble2, testdouble3, d64i.double_number);
+        printf("%.20e = %.20e <=> %.20e ? ", testdouble2, testdouble3, d64i.double_number);
 
         if (testdouble3 == d64i.double_number)
         {
@@ -263,7 +263,7 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
             }
             else//if(exp_diff < 0)
             {
-                for(int i = 0; i < exp_diff_abs; i++)
+                for(int i = 0; i < exp_diff_abs  && i < 52; i++)
                 {
                     op1->fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
                     if (op1->fraction1 % 2 == 1)     // czy ostatni bit to 1?
@@ -279,13 +279,14 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     // Obie jedynki zostaną dodane w pierwszej czastce.
                     op1->fraction1 += (1 <<  (20 - exp_diff_abs));
                 }
-                else
+                else if (exp_diff_abs < 53)
                 {
                     // Jedynka liczby op2 zostanie dodana w drugiej części.
                     op1->fraction2 += (1 << (52 - exp_diff_abs));
                     if (op1->fraction2 < (1 << (52 - exp_diff_abs)) )
                         op1->fraction1++; // nadmiar
                 }
+
 
             }
 
