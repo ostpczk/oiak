@@ -1,0 +1,28 @@
+#######################
+# Lista operandów do testowania operacji.
+# Wszelkie linijki rozpoczęte od znaków innych niż A, S będą potraktowane jako
+# komentarze. (Zalecamy stosowanie #)
+# A - Addition (dodawanie)
+# S - Substraction (odejmowanie)
+####################
+#Op Double1   Double2
+# ######### #########
+
+
+S 0 0.12
+A 666.3 2.137
+A 3e-312 5.2e-311 
+A 0.000000000003 0.00001213
+A 56 2324.312
+A 2344 2134
+A 666 666
+A 7777.7777 7777.777
+A 12.48 -5.12
+S 666 444
+S 643 -234
+S 444 444
+S 123 -123
+S 334 543
+S 420.777 812.3
+S 3e-308 2.8e-208
+S 3 3.00001
