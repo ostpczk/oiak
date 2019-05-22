@@ -539,3 +539,51 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
     return op3;
 }
 
+xDouble* mul(xDouble* op1, xDouble* op2, xDouble* op3)
+{
+    op3->sign = '0';
+    op3->exponent = 0;
+    op3->fraction1 = 0;
+    op3->fraction2 = 0;
+
+    xDouble* arg1;
+    xDouble* arg2;
+    xDouble* arg3;
+
+    bool findFirstArg=false;
+
+    if(op1->sign==op2->sign)
+    {
+        op3->sign='0';
+    }
+    else
+    {
+        op3->sign='1';
+    }
+    op3->exponent=op1->exponent+op2->exponent-1023;
+
+    for(int i=0;i<52;i++)
+    {
+        if(i<32)
+        {
+            if((op2->fraction2>>i)%2==1)
+            {
+            op1->exponent+=i;
+            arg1=op1;
+            op3=add(op3,arg1,op3);
+            }
+        }
+        else
+        {
+            if((op2->fraction1>>i-31)%2==1)
+            {
+            op1->exponent+=i;
+            arg1=op1;
+            op3=add(op3,arg1,op3);
+            }
+        }
+        if(i==2)
+        break;
+    }
+    return op3;
+}

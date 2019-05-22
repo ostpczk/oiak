@@ -8,7 +8,6 @@ class xDouble
 {
     public:
         xDouble();
-        virtual ~xDouble();
         char sign;
 
         char exponent[12];
@@ -20,10 +19,6 @@ class xDouble
 
         uint32_t fraction1_int;
         uint32_t fraction2_int;
-
-    protected:
-
-    private:
 };
 
 #endif // XDOUBLE_H
