@@ -36,6 +36,7 @@ void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3);
 void test();
 
 xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3);
+xDouble* mul(xDouble* op1, xDouble* op2, xDouble* op3);
 
 
 #endif // OPERATIONS_H
