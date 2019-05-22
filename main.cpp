@@ -242,6 +242,7 @@ int main()
     {
     in(op1_p,op2_p,op3_p);
     testdouble3 = testdouble1 + testdouble2; // benchmark
+    for(int i=0;i<1000000;i++) //test
     add(op1_p,op2_p,op3_p);
     out(op1_p,op2_p,op3_p);
     }
@@ -254,6 +255,7 @@ int main()
     else
         op2.sign='0';
     testdouble3 = testdouble1 - testdouble2; // benchmark
+    for(int i=0;i<1000000;i++) //test
     add(op1_p,op2_p,op3_p);
     out(op1_p,op2_p,op3_p);
     }
