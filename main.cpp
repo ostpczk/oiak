@@ -36,8 +36,8 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3)
         display_number >>= 1;
     }
 
-        char fraction0_s[13];
-        fraction0_s[12] = '\0';
+    char fraction0_s[13];
+    fraction0_s[12] = '\0';
 
     for(int i = 11; i >= 0; i--)
     {
@@ -148,7 +148,7 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3)
         else
         {
             op2->fraction2_s[i] = '1';
-            op2->fraction2 += (1 << 31-i);
+            op2->fraction2 += (1 << (31-i));
         }
         display_number >>= 1;
     }
@@ -159,7 +159,7 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3)
         else
         {
             op2->fraction1_s[i] = '1';
-            op2->fraction1 += (1 << 19-i); // TODO 10 czy 19?
+            op2->fraction1 += (1 << 19-i);
         }
         display_number >>= 1;
     }
@@ -190,8 +190,7 @@ int picked_option=0;
 printf("\nCo byc chcial uczynic\n");
 printf("1-Dodawanie\n");
 printf("2-Odejmowanie\n");
-printf("3-Mnozenie\n");
-printf("6-Test\n");
+printf("3-Test\n");
 
 scanf("%d", &picked_option);
 return picked_option;
@@ -259,20 +258,13 @@ int main()
     out(op1_p,op2_p,op3_p);
     }
     break;
-    case 3:
-    {
-    in(op1_p,op2_p,op3_p);
-    mul(op1_p,op2_p,op3_p);
-    out(op1_p,op2_p,op3_p);
-    break;
-    }
-    default:
-    printf("\nWybierz poprawna opcje :-)\n");
-    break;
-    case 6:
+    case 3: // testu
     {
         test();
     }
+    break;
+    default:
+    printf("\nWybierz poprawna opcje :-)\n");
     break;
     }
 
