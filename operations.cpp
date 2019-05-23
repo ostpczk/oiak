@@ -256,7 +256,64 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
     short int gbit = 0;
 
 
-    if( (op1->sign != op2->sign) && (op1->exponent == op2->exponent) && (op1->fraction1 == op2->fraction1) && (op1->fraction2 == op2->fraction2)) // dodawanie liczb o przeciwnym znaku
+
+    if((op1->exponent == 2047 )|| (op2->exponent == 2047))
+    {
+        if((op1->exponent == 2047 )&& (op2->exponent == 2047))
+        {
+            if(op1->fraction1 !=0 || op1->fraction2 !=0  || op2->fraction1 !=0 || op2->fraction2 !=0)
+            {
+                op3->sign = '0';
+                op3->exponent = 2047;
+                op3->fraction1 = (1<<19);
+                op3->fraction2 = 0;
+            }
+            else
+            {
+                op3->sign = '0';
+                op3->exponent = 2047;
+                op3->fraction1 = (1<<19);
+                op3->fraction2 = 0;
+            }
+        }
+        else if(op1->exponent == 2047)
+        {
+            if(op1->fraction1 !=0 || op1->fraction2 !=0 ) //nan
+            {
+                op3->sign = '0';
+                op3->exponent = 2047;
+                op3->fraction1 = (1<<19);
+                op3->fraction2 = 0;
+            }
+            else
+            {
+                op3->sign = '0';
+                op3->exponent = 2047;
+                op3->fraction1 = 0;
+                op3->fraction2 = 0;
+            }
+
+        }
+        else // if (op2->exponent == 2047)
+        {
+            if(op2->fraction1 !=0 || op2->fraction2 !=0 ) //nan
+            {
+                op3->sign = '0';
+                op3->exponent = 2047;
+                op3->fraction1 = (1<<19);
+                op3->fraction2 = 0;
+            }
+            else
+            {
+                op3->sign = '0';
+                op3->exponent = 2047;
+                op3->fraction1 = 0;
+                op3->fraction2 = 0;
+            }
+
+        }
+    }
+    else if( (op1->sign != op2->sign) && (op1->exponent == op2->exponent) && (op1->fraction1 == op2->fraction1) && (op1->fraction2 == op2->fraction2)) // dodawanie liczb o przeciwnym znaku
     {
         // dwie liczby maja rowny modul i przeciwny znak - zerujemy
         op3->sign = '0';
@@ -267,6 +324,8 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
     }
     else // porownanie znakow zrobimy wtedy gdy zdecydujemy czy dodajemy czy odejmujemy
     {
+
+
         if(op1->exponent != op2->exponent)
         {
             int exp_diff = op1->exponent-op2->exponent; // Obliczanie roznicy wykladnikow.
