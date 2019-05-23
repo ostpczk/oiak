@@ -3,7 +3,7 @@
 #include <string.h>
 #include "operations.h"
 
-void add_op1_op2_fraction_with(xDouble* op1, xDouble* op2, xDouble* op3)
+void add_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 {
 
     __m64 reg1 = _mm_set_pi32 (op1->fraction1, op1->fraction2); //op1[fraction2, fraction1]
@@ -22,7 +22,7 @@ void add_op1_op2_fraction_with(xDouble* op1, xDouble* op2, xDouble* op3)
 }
 
 
-void sub_op1_op2_fraction_with(xDouble* op1, xDouble* op2, xDouble* op3)
+void sub_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 {
     __m64 reg1 = _mm_set_pi32 (op1->fraction1, op1->fraction2);
     __m64 reg2 = _mm_set_pi32 (op2->fraction1, op2->fraction2);
@@ -39,7 +39,7 @@ void sub_op1_op2_fraction_with(xDouble* op1, xDouble* op2, xDouble* op3)
     _mm_empty();
 }
 
-void sub_op2_op1_fraction_with(xDouble* op1, xDouble* op2, xDouble* op3)
+void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 {
     __m64 reg1 = _mm_set_pi32 (op1->fraction1, op1->fraction2);
     __m64 reg2 = _mm_set_pi32 (op2->fraction1, op2->fraction2);
@@ -56,7 +56,7 @@ void sub_op2_op1_fraction_with(xDouble* op1, xDouble* op2, xDouble* op3)
 }
 
 
-void add_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
+void add_op1_op2_fraction_without(xDouble* op1, xDouble* op2, xDouble* op3)
 {
     op3->fraction2 += op1->fraction2; // tu mozna zastosowac
     op3->fraction2 += op2->fraction2; // akcelerancje sprzentowom
@@ -69,7 +69,7 @@ void add_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 }
 
 
-void sub_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
+void sub_op1_op2_fraction_without(xDouble* op1, xDouble* op2, xDouble* op3)
 {
     op3->fraction2 += op1->fraction2; // tu mozna zastosowac
     op3->fraction2 -= op2->fraction2; // akcelerancje sprzentowom
@@ -81,7 +81,7 @@ void sub_op1_op2_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
     op3->fraction1 -= op1->fraction1;
 }
 
-void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
+void sub_op2_op1_fraction_without(xDouble* op1, xDouble* op2, xDouble* op3)
 {
     op3->fraction2 += op2->fraction2; // tu mozna zastosowac
     op3->fraction2 -= op1->fraction2; // akcelerancje sprzentowom
@@ -331,8 +331,6 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     if (op1->fraction2 < (1 << (52 - exp_diff_abs)) )
                         op1->fraction1++; // nadmiar
                 }
-
-
             }
 
 
@@ -477,9 +475,20 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     }
 
 
-                    if( op2->fraction2 > op1->fraction2)
+                   if( op2->fraction1 > op1->fraction1)
                     {
                         sub_op2_op1_fraction(op1,op2,op3);
+                    }
+                    else if(op2->fraction1==op1->fraction1)
+                    {
+                        if(op2->fraction2>op1->fraction2)
+                        {
+                            sub_op2_op1_fraction(op1,op2,op3);
+                        }
+                        else
+                        {
+                            sub_op1_op2_fraction(op1,op2,op3);
+                        }
                     }
                     else
                     {
@@ -536,7 +545,7 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                         }
                     }
                 }
-                else // if (op1->sign == '1')
+                else
                 {
                     if(op1->fraction1>op2->fraction1)
                     {
@@ -555,19 +564,40 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                         op3->sign = '0';
                     }
 
-                    sub_op2_op1_fraction(op1,op2,op3);
+
+                                      if( op2->fraction1 > op1->fraction1)
+                    {
+                        sub_op2_op1_fraction(op1,op2,op3);
+                    }
+                    else if(op2->fraction1==op1->fraction1)
+                    {
+                        if(op2->fraction2>op1->fraction2)
+                        {
+                            sub_op2_op1_fraction(op1,op2,op3);
+                        }
+                        else
+                        {
+                            sub_op1_op2_fraction(op1,op2,op3);
+                        }
+                    }
+                    else
+                    {
+                        sub_op1_op2_fraction(op1,op2,op3);
+                    }
+
+                    if(op1->fraction1>op2->fraction1) //////////////// OSTATNI BŁĄÐ - 222.23456 228.76543
+                    {
+                            op3->fraction2=0-op3->fraction2;
+                            if(op1->fraction2>op2->fraction2)
+                            {
+                                op3->fraction1--;
+                            }
+                            op3->fraction1=0-op3->fraction1;
+                    }
+
                     if(gbit == 1)
                         op3->fraction2--;
 
-                    if(op1->fraction1>op2->fraction1)
-                    {
-                        op3->fraction2=0-op3->fraction2;
-                        if(op2->fraction2 < op1->fraction2) // niedomiar
-                        {
-                            op3->fraction1 += 1; // przeniesienie do 1szej czesci mantysy
-                        }
-                        op3->fraction1=0-op3->fraction1;
-                    }
                     int counter=0;
                     bool second = false;
                     for(counter=20; counter>0; counter--)
@@ -590,15 +620,19 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                             }
                         }
                     }
-                    for(int shift=0; shift<counter; shift++)
+
+                    for(int shift=0; shift<counter && op3->exponent != 0; shift++)
                     {
                         op3->exponent-=1;
-                        op3->fraction1<<=1;
-                        if(op3->fraction2>>31==1)
+                        if(op3->exponent !=0)
                         {
-                            op3->fraction1+=1;
+                            op3->fraction1<<=1;
+                            if(op3->fraction2>>31==1)
+                            {
+                                op3->fraction1+=1;
+                            }
+                            op3->fraction2<<=1;
                         }
-                        op3->fraction2<<=1;
                     }
                 }
             }
