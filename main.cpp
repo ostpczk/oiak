@@ -10,7 +10,7 @@
 
 #pragma STDC FENV_ACCESS on
 
-double testdouble1, testdouble2, testdouble3,testdouble4;
+double testdouble1, testdouble2, testdouble3, testdouble4;
 
 uint64_t display_number;
 d64i_t d64i;
@@ -36,8 +36,8 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3)
         display_number >>= 1;
     }
 
-        char fraction0_s[13];
-        fraction0_s[12] = '\0';
+    char fraction0_s[13];
+    fraction0_s[12] = '\0';
 
     for(int i = 11; i >= 0; i--)
     {
@@ -69,10 +69,10 @@ void out(xDouble* op1, xDouble* op2, xDouble* op3)
     d64i.integer_number <<= 32;
     d64i.integer_number += op3->fraction2;
 
-    testdouble4 = (double) d64i.double_number;
+    testdouble4 = (double) d64i.double_number; //programistyczne woodo nie usowac tej linii
 
-    printf("UZYSKANA WARTOSC: %.32le\n",d64i.double_number);
-    printf("POZADANA WARTOSC: %.32le\n", testdouble3);
+    printf("UZYSKANA WARTOSC: %.32e\n",d64i.double_number);
+    printf("POZADANA WARTOSC: %.32e\n", testdouble3);
 }
 
 
@@ -148,7 +148,7 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3)
         else
         {
             op2->fraction2_s[i] = '1';
-            op2->fraction2 += (1 << 31-i);
+            op2->fraction2 += (1 << (31-i));
         }
         display_number >>= 1;
     }
@@ -159,7 +159,7 @@ void in(xDouble* op1, xDouble* op2, xDouble* op3)
         else
         {
             op2->fraction1_s[i] = '1';
-            op2->fraction1 += (1 << 19-i); // TODO 10 czy 19?
+            op2->fraction1 += (1 << 19-i);
         }
         display_number >>= 1;
     }
@@ -190,8 +190,7 @@ int picked_option=0;
 printf("\nCo byc chcial uczynic\n");
 printf("1-Dodawanie\n");
 printf("2-Odejmowanie\n");
-printf("3-Mnozenie\n");
-printf("6-Test\n");
+printf("3-Test\n");
 
 scanf("%d", &picked_option);
 return picked_option;
@@ -201,6 +200,7 @@ return picked_option;
 int main()
 {
 
+    fesetround(FE_TOWARDZERO);
     xDouble op1;
     xDouble op2;
     xDouble op3;
@@ -234,7 +234,7 @@ int main()
     xDouble* op2_p = &op2;
     xDouble* op3_p = &op3;
 
-    std::fesetround(FE_TOWARDZERO);
+
 
     switch(menu())
     {
@@ -260,20 +260,13 @@ int main()
     out(op1_p,op2_p,op3_p);
     }
     break;
-    case 3:
-    {
-    in(op1_p,op2_p,op3_p);
-    mul(op1_p,op2_p,op3_p);
-    out(op1_p,op2_p,op3_p);
-    break;
-    }
-    default:
-    printf("\nWybierz poprawna opcje :-)\n");
-    break;
-    case 6:
+    case 3: // testu
     {
         test();
     }
+    break;
+    default:
+    printf("\nWybierz poprawna opcje :-)\n");
     break;
     }
 

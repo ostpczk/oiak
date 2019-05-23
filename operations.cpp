@@ -96,6 +96,7 @@ void sub_op2_op1_fraction(xDouble* op1, xDouble* op2, xDouble* op3)
 void test()
 {
     double testdouble1, testdouble2, testdouble3, testdouble4;
+
     int correct = 0;
     int incorrect = 0;
 
@@ -111,7 +112,8 @@ void test()
     char operation;
     FILE *datafile = fopen("data.txt", "r");
 
-    do{
+    do
+    {
         //fscanf(datafile, " %c %lf %lf", &operation, &testdouble1, &testdouble2);
         op1.exponent = 0;
         op1.fraction1 = 0;
@@ -212,14 +214,14 @@ void test()
 
         testdouble4 = (double) d64i.double_number;
 
-        printf("%e", testdouble1);
+        printf("%.20e", testdouble1);
 
         if(operation == 'A')
             printf(" + ");
         else if (operation == 'S')
             printf(" - ");
 
-        printf("%e = %e <=> %e ? ", testdouble2, testdouble3, d64i.double_number);
+        printf("%.20e = %.20e <=> %.20e ? ", testdouble2, testdouble3, d64i.double_number);
 
         if (testdouble3 == d64i.double_number)
         {
@@ -251,6 +253,9 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
     op3->fraction1 = 0;
     op3->fraction2 = 0;
 
+    short int gbit = 0;
+
+
     if( (op1->sign != op2->sign) && (op1->exponent == op2->exponent) && (op1->fraction1 == op2->fraction1) && (op1->fraction2 == op2->fraction2)) // dodawanie liczb o przeciwnym znaku
     {
         // dwie liczby maja rowny modul i przeciwny znak - zerujemy
@@ -276,6 +281,7 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
             {
                 for(int i = 0; i < exp_diff_abs && i < 52; i++)
                 {
+                    if(op2->fraction2%2==1) gbit = 1;
                     op2->fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
                     if (op2->fraction1 % 2 == 1)     // czy ostatni bit to 1?
                         op2->fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
@@ -301,8 +307,9 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
             }
             else//if(exp_diff < 0)
             {
-                for(int i = 0; i < exp_diff_abs; i++)
+                for(int i = 0; i < exp_diff_abs  && i < 52; i++)
                 {
+                    if(op1->fraction2%2==1) gbit = 1;
                     op1->fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
                     if (op1->fraction1 % 2 == 1)     // czy ostatni bit to 1?
                         op1->fraction2 += (1 << 31); // przenosimy na poczatek czesci 2
@@ -317,13 +324,14 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     // Obie jedynki zostaną dodane w pierwszej czastce.
                     op1->fraction1 += (1 <<  (20 - exp_diff_abs));
                 }
-                else
+                else if (exp_diff_abs < 53)
                 {
                     // Jedynka liczby op2 zostanie dodana w drugiej części.
                     op1->fraction2 += (1 << (52 - exp_diff_abs));
                     if (op1->fraction2 < (1 << (52 - exp_diff_abs)) )
                         op1->fraction1++; // nadmiar
                 }
+
 
             }
 
@@ -339,30 +347,38 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
             {
                 op3->sign = '0';
                 sub_op1_op2_fraction(op1, op2, op3);
+                if(gbit == 1)
+                    op3->fraction2--;
 
             }
             else if(op1->sign == '0' && exp_diff < 0)
             {
                 op3->sign = '1';
                 sub_op2_op1_fraction(op1, op2, op3);
+                if(gbit == 1)
+                    op3->fraction2--;
             }
             else if(op1->sign == '1' && exp_diff > 0)
             {
                 op3->sign = '1';
                 sub_op1_op2_fraction(op1, op2, op3);
+                if(gbit == 1)
+                    op3->fraction2--;
             }
             else if(op1->sign == '1' && exp_diff < 0)
             {
                 op3->sign = '0';
                 sub_op2_op1_fraction(op1, op2, op3);
+                if(gbit == 1)
+                    op3->fraction2--;
             }
 
-        // Wyrownywanie potegi tak, by przed mantyse wystawala ostatnia, domyslna "1".
+            // Wyrownywanie potegi tak, by przed mantyse wystawala ostatnia, domyslna "1".
 
-        int fract_dist = op3->fraction1>>20; // fraction distance - odległość
+            int fract_dist = op3->fraction1>>20; // fraction distance - odległość
 
-        if(fract_dist > 1)
-        {
+            if(fract_dist > 1)
+            {
                 do
                 {
                     op3->fraction2 >>= 1; // roundTowardZero - zaokraglenie przez obciecie
@@ -372,21 +388,28 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     op3->exponent++;
                     fract_dist >>= 1;
 
-                } while (fract_dist > 1);
-        }
-        else if(fract_dist < 1)
-        {
+                }
+                while (fract_dist > 1);
+            }
+            else if(fract_dist < 1)
+            {
                 do
                 {
                     op3->fraction1 <<= 1;
                     if (op3->fraction2 >> 31 == 1)     // czy ostatni bit to 1?
                         op3->fraction1 += 1; // przenosimy na poczatek czesci 2
                     op3->fraction2 <<= 1;
+                    if (gbit == 1)
+                    {
+                        op3->fraction2++;
+                        gbit = 0;
+                    }
                     op3->exponent--;
                     fract_dist = op3->fraction1>>20;
 
-                } while (fract_dist != 1);
-        }
+                }
+                while (fract_dist != 1);
+            }
 
         }
         else // wykladniki sa rowne
@@ -398,13 +421,15 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                 op3->sign = '0';
 
                 add_op1_op2_fraction(op1,op2,op3);
+                if(gbit == 1)
+                    op3->fraction2++;
 
                 if(op3->exponent != 0)
                 {
                     op3->exponent+=1;
                     op3->fraction2>>=1;
                     if(op3->fraction1%2==1) op3->fraction2+=(1<<31);
-                        op3->fraction1>>=1;
+                    op3->fraction1>>=1;
                 }
                 else
                 {
@@ -420,8 +445,12 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                 op3->sign = '1';
 
                 add_op1_op2_fraction(op1,op2,op3);
+                if(gbit == 1)
+                    op3->fraction2++;
 
                 op3->exponent+=1;
+                if(op3->fraction2%2==1) gbit = 1;
+                else gbit = 0;
                 op3->fraction2>>=1;
                 if(op3->fraction1%2==1) op3->fraction2+=(1<<31);
                 op3->fraction1>>=1;
@@ -447,21 +476,32 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                         op3->sign = '1';
                     }
 
-                    sub_op1_op2_fraction(op1,op2,op3);
 
-                    if(op2->fraction1>op1->fraction1)
+                    if( op2->fraction2 > op1->fraction2)
                     {
-                        op3->fraction2=0-op3->fraction2;    // xor
-                        if(op1->fraction2 < op2->fraction2) // niedomiar
-                        {
-                            op3->fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
-                        }
-                        op3->fraction1=0-op3->fraction1;
+                        sub_op2_op1_fraction(op1,op2,op3);
                     }
+                    else
+                    {
+                        sub_op1_op2_fraction(op1,op2,op3);
+                    }
+
+                    if(op1->fraction1>op2->fraction1) //////////////// OSTATNI BŁĄÐ - 222.23456 228.76543
+                    {
+                            op3->fraction2=0-op3->fraction2;
+                            if(op1->fraction2>op2->fraction2)
+                            {
+                                op3->fraction1--;
+                            }
+                            op3->fraction1=0-op3->fraction1;
+                    }
+
+                    if(gbit == 1)
+                        op3->fraction2--;
 
                     int counter=0;
                     bool second = false;
-                    for(counter=20;counter>0;counter--)
+                    for(counter=20; counter>0; counter--)
                     {
                         if((op3->fraction1>>counter)==1)
                         {
@@ -471,21 +511,17 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     }
                     if(counter==0)
                     {
-                    for(counter=32;counter>0;counter--)
-                    {
-                        if((op3->fraction2>>counter)==1)
+                        for(counter=32; counter>0; counter--)
                         {
-                            second = true;
-                            counter=32-counter+20;
-                            break;
+                            if((op3->fraction2>>counter)==1)
+                            {
+                                second = true;
+                                counter=32-counter+20;
+                                break;
+                            }
                         }
                     }
-                    }
-                    int parm=20;
-                    if(second)
-                    {
-                        parm=52;
-                    }
+
                     for(int shift=0; shift<counter && op3->exponent != 0; shift++)
                     {
                         op3->exponent-=1;
@@ -502,7 +538,7 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                 }
                 else // if (op1->sign == '1')
                 {
-                     if(op1->fraction1>op2->fraction1)
+                    if(op1->fraction1>op2->fraction1)
                     {
                         op3->sign = '1';
                     }
@@ -520,20 +556,21 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     }
 
                     sub_op2_op1_fraction(op1,op2,op3);
+                    if(gbit == 1)
+                        op3->fraction2--;
 
                     if(op1->fraction1>op2->fraction1)
                     {
                         op3->fraction2=0-op3->fraction2;
                         if(op2->fraction2 < op1->fraction2) // niedomiar
                         {
-                            op3->fraction1 -= 1; // przeniesienie do 1szej czesci mantysy
+                            op3->fraction1 += 1; // przeniesienie do 1szej czesci mantysy
                         }
                         op3->fraction1=0-op3->fraction1;
                     }
-
                     int counter=0;
                     bool second = false;
-                    for(counter=20;counter>0;counter--)
+                    for(counter=20; counter>0; counter--)
                     {
                         if((op3->fraction1>>counter)==1)
                         {
@@ -543,28 +580,23 @@ xDouble* add(xDouble* op1, xDouble* op2, xDouble* op3)
                     }
                     if(counter==0)
                     {
-                    for(counter=32;counter>0;counter--)
-                    {
-                        if((op3->fraction2>>counter)==1)
+                        for(counter=32; counter>0; counter--)
                         {
-                            second = true;
-                            counter=32-counter+20;
-                            break;
+                            if((op3->fraction2>>counter)==1)
+                            {
+                                second = true;
+                                counter=32-counter+20;
+                                break;
+                            }
                         }
                     }
-                    }
-                    int parm=20;
-                    if(second)
-                    {
-                        parm=52;
-                    }
-                    for(int shift=0;shift<counter;shift++)
+                    for(int shift=0; shift<counter; shift++)
                     {
                         op3->exponent-=1;
                         op3->fraction1<<=1;
                         if(op3->fraction2>>31==1)
                         {
-                        op3->fraction1+=1;
+                            op3->fraction1+=1;
                         }
                         op3->fraction2<<=1;
                     }
@@ -600,28 +632,28 @@ xDouble* mul(xDouble* op1, xDouble* op2, xDouble* op3)
     }
     op3->exponent=op1->exponent+op2->exponent-1023;
 
-    for(int i=0;i<52;i++)
+    for(int i=0; i<52; i++)
     {
         if(i<32)
         {
             if((op2->fraction2>>i)%2==1)
             {
-            op1->exponent+=i;
-            arg1=op1;
-            op3=add(op3,arg1,op3);
+                op1->exponent+=i;
+                arg1=op1;
+                op3=add(op3,arg1,op3);
             }
         }
         else
         {
-            if((op2->fraction1>>i-31)%2==1)
+            if( (op2->fraction1 >> (i-31) ) % 2 == 1)
             {
-            op1->exponent+=i;
-            arg1=op1;
-            op3=add(op3,arg1,op3);
+                op1->exponent+=i;
+                arg1=op1;
+                op3=add(op3,arg1,op3);
             }
         }
         if(i==2)
-        break;
+            break;
     }
     return op3;
 }
